@@ -4,13 +4,45 @@
     flex-direction: column;
     gap: 20px;
 }
+.upload-audio {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    /* Make it clear that this area is clickable */
+}
 
 .upload-audio input {
-    margin-bottom: 10px;
+    display: none;
+    /* Completely hide the input element */
+}
+
+.upload-audio h2 {
+    color: white;
+    text-align: center;
+    pointer-events: none;
+    /* Ensure the text doesn't interfere with the click */
+}
+
+.upload-audio::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #073b4c;
+    border-radius: 5px;
+    border: 2px dashed rgb(0, 135, 247);
+    z-index: -1;
+    /* Keep the background behind the text */
 }
 
 .buttons button {
-    margin-right: 10px;
+    margin:0 0 0 10px;
+    
 }
 
 .audio-player {
@@ -23,6 +55,7 @@
     border-radius: 200px;
     background: #3FA2F6;
     margin-top: 20px;
+    padding: 5px;
 }
 
 .play-button,
@@ -84,4 +117,27 @@
     background: #4CAF50;
     cursor: pointer;
     border-radius: 50%;
+}
+.speaker-button{
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 5%;
+    font-size: 17px;
+}
+.speaker-input{
+    padding: 8px;
+    
+}
+.one{
+background-color:#023047 ;
+}
+.two{
+background-color:#bc6c25 ;
+}
+.three{
+background-color:#dda15e ;
+}
+.four{
+background-color:#fca311 ;
 }

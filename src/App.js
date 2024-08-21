@@ -8,10 +8,10 @@ function App() {
 const editorRef = useRef(null);
 
   const [fileName, setFileName] = useState('')
-  const [one,setOne]=useState('Speaker1');
-  const [two,setTwo]=useState('Speaker2');
-  const [three,setThree]=useState('Speaker3');
-  const [four,setFour]=useState('Speaker4');
+  const [one,setOne]=useState('Speaker 1');
+  const [two,setTwo]=useState('Speaker 2');
+  const [three,setThree]=useState('Speaker 3');
+  const [four,setFour]=useState('Speaker 4');
  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [time ,setTime] = useState(0)
@@ -108,9 +108,10 @@ const handleButtonClick = (speaker) => {
   return (
     <div className="main-container">
 
-<div className='upload-audio'>
-        <input type="file" id="myFile" name="filename" accept="audio/*" onChange={onUpload}></input>
-      </div>
+{!fileName && <div className='upload-audio' onClick={() => document.getElementById('myFile').click()}>
+    <input type="file" id="myFile" name="filename" accept="audio/*" onChange={onUpload} />
+    <h2>Drop files here or click to upload.</h2>
+</div>}
 
  {fileName && (
         <div className='audio-player'>
@@ -130,14 +131,14 @@ const handleButtonClick = (speaker) => {
       )}
       
 <div className='buttons'>
-  <button onClick={(e)=>{handleButtonClick(one)}}>{one}</button> 
-  <input type='text' value={one} onChange={handleInputChange(setOne)}/>
-  <button onClick={(e)=>{handleButtonClick(two)}}>{two}</button> 
-  <input type='text' value={two} onChange={handleInputChange(setTwo)}/>
-  <button onClick={(e)=>{handleButtonClick(three)}}>{three}</button> 
-  <input type='text' value={three} onChange={handleInputChange(setThree)}/>
-  <button onClick={(e)=>{handleButtonClick(four)}}>{four}</button> 
-  <input type='text' value={four} onChange={handleInputChange(setFour)}/>
+  <button className='speaker-button one' onClick={(e)=>{handleButtonClick(one)}}>{one}</button> 
+  <input className="speaker-input" type='text' value={one} onChange={handleInputChange(setOne)}/>
+  <button className='speaker-button two' onClick={(e)=>{handleButtonClick(two)}}>{two}</button> 
+  <input className="speaker-input" type='text' value={two} onChange={handleInputChange(setTwo)}/>
+  <button className='speaker-button three' onClick={(e)=>{handleButtonClick(three)}}>{three}</button> 
+  <input className="speaker-input" type='text' value={three} onChange={handleInputChange(setThree)}/>
+  <button className='speaker-button four' onClick={(e)=>{handleButtonClick(four)}}>{four}</button> 
+  <input className="speaker-input" type='text' value={four} onChange={handleInputChange(setFour)}/>
 </div>
       <div className='main-content'>
 
