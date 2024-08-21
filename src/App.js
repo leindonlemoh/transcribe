@@ -17,13 +17,6 @@ const editorRef = useRef(null);
   const [time ,setTime] = useState(0)
   const [test ,setTest] = useState('')
 
-
-const handleButtonClick = (speaker) => {
-  if (editorRef.current) {
-    editorRef.current.insertHTML('<br/>' + speaker + ":");
-  }
-};
-
   const onUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -31,6 +24,14 @@ const handleButtonClick = (speaker) => {
       setFileName(url);
     }
   };
+  
+const handleButtonClick = (speaker) => {
+  if (editorRef.current) {
+    editorRef.current.insertHTML('<br/>' + speaker + ":");
+  }
+};
+
+
 
     const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
@@ -86,10 +87,12 @@ const handleButtonClick = (speaker) => {
   const handleVolumeChange = (e) => {
     audioRef.current.volume = e.target.value;
   };
-    const handleAudioEnd = () => {
+
+  const handleAudioEnd = () => {
     console.log('Audio playback has ended.');
     setIsPlaying(false); // Update state to indicate audio has stopped
   };
+
   useEffect(() => {
     console.log("isPlaying",isPlaying)
     if (audioRef.current) {
@@ -101,6 +104,7 @@ const handleButtonClick = (speaker) => {
       }
     };
   }, [isPlaying]);
+  
   return (
     <div className="main-container">
 
