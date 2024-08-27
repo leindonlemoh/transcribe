@@ -4,15 +4,16 @@ import './styles/index.css'
 import 'suneditor/dist/css/suneditor.min.css'
 import playIcon from './Image/play.svg'
 import pauseIcon from './Image/pause.svg'
+import Modal from './Modal';
 function App() {
 const editorRef = useRef(null);
-
+  const [isOpen,setIsOpen] = useState(false)
   const [fileName, setFileName] = useState('')
   const [one,setOne]=useState('Speaker 1');
   const [two,setTwo]=useState('Speaker 2');
   const [three,setThree]=useState('Speaker 3');
   const [four,setFour]=useState('Speaker 4');
- const audioRef = useRef(null);
+  const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [time ,setTime] = useState(0)
   const [test ,setTest] = useState('')
@@ -106,6 +107,10 @@ const handleButtonClick = (speaker) => {
   }, [isPlaying]);
   
   return (
+    <div>
+      <section className='sortcutkey-btn-container'> 
+        <button className='shortcut-key-btn' onClick={(e)=>{setIsOpen(true)}}> Shortcut Keys</button>
+      </section>
     <div className="main-container">
 
 {!fileName && <div className='upload-audio' onClick={() => document.getElementById('myFile').click()}>
@@ -130,7 +135,7 @@ const handleButtonClick = (speaker) => {
         </div>
       )}
       
-<div className='buttons'>
+<section className='buttons'>
   <button className='speaker-button one' onClick={(e)=>{handleButtonClick(one)}}>{one}</button> 
   <input className="speaker-input" type='text' value={one} onChange={handleInputChange(setOne)}/>
   <button className='speaker-button two' onClick={(e)=>{handleButtonClick(two)}}>{two}</button> 
@@ -139,13 +144,14 @@ const handleButtonClick = (speaker) => {
   <input className="speaker-input" type='text' value={three} onChange={handleInputChange(setThree)}/>
   <button className='speaker-button four' onClick={(e)=>{handleButtonClick(four)}}>{four}</button> 
   <input className="speaker-input" type='text' value={four} onChange={handleInputChange(setFour)}/>
-</div>
-      <div className='main-content'>
+</section>
+      <section className='main-content'>
 
 <SunEditor getSunEditorInstance={editor => { editorRef.current = editor; }} />
 
-      </div>
-
+      </section>
+    </div>
+<Modal isOpen={isOpen} setOpen={setIsOpen}/>
     </div>
   );
 }
