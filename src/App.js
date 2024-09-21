@@ -5,18 +5,35 @@ import 'suneditor/dist/css/suneditor.min.css'
 import playIcon from './Image/play.svg'
 import pauseIcon from './Image/pause.svg'
 import Modal from './Modal';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 function App() {
-const editorRef = useRef(null);
+
+  const editorRef = useRef(null);
   const [isOpen,setIsOpen] = useState(false)
   const [fileName, setFileName] = useState('')
+
+  const [speaker1,setSpeaker1]=useState('1')
+  const [speaker2,setSpeaker2]=useState('2')
+  const [speaker3,setSpeaker3]=useState('3')
+  const [speaker4,setSpeaker4]=useState('4')
+  const [playKey,setPlayKey]=useState('[')
+  const [pauseKey,setPauseKey]=useState(']')
+  const [volumeUp,setVolumeUp]=useState('=')
+  const [volumeDown,setVolumeDown]=useState('-')
+
+
   const [one,setOne]=useState('Speaker 1');
   const [two,setTwo]=useState('Speaker 2');
   const [three,setThree]=useState('Speaker 3');
   const [four,setFour]=useState('Speaker 4');
+
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [time ,setTime] = useState(0)
   const [test ,setTest] = useState('')
+
+  const [editorContent, setEditorContent] = useState('');
+
 
   const onUpload = (e) => {
     const file = e.target.files[0];
@@ -39,21 +56,32 @@ const handleButtonClick = (speaker) => {
   };
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.altKey && event.key === '1') {
-        handleButtonClick(one);
-      } else if (event.altKey && event.key === '2') {
-        handleButtonClick(two);
-      } else if (event.altKey && event.key === '3') {
-        handleButtonClick(three);
-      } else if (event.altKey && event.key === '4') {
-        handleButtonClick(four);
-      }else if(event.altKey && event.key === '['){
-        playAudio()
-      }
-      else if(event.altKey && event.key === ']'){
-        pauseAudio()
-      }
-    };
+  if (event.altKey && event.key === speaker1) {
+    handleButtonClick(one);
+  } else if (event.altKey && event.key === speaker2) {
+    handleButtonClick(two);
+  } else if (event.altKey && event.key === speaker3) {
+    handleButtonClick(three);
+  } else if (event.altKey && event.key === speaker4) {
+    handleButtonClick(four);
+  } else if (event.altKey && event.key === playKey) {
+    playAudio();
+  } else if (event.altKey && event.key === pauseKey) {
+    pauseAudio();
+  } else if (event.altKey && event.key === volumeUp) {
+    adjustVolume(0.1); // Increase volume by 0.1
+  } else if (event.altKey && event.key === volumeDown) {
+    adjustVolume(-0.1); // Decrease volume by 0.1
+  }
+};
+
+const adjustVolume = (change) => {
+  if (audioRef.current) {
+    // Get the current volume and adjust it
+    const newVolume = Math.min(Math.max(audioRef.current.volume + change, 0), 1); // Keep volume between 0 and 1
+    audioRef.current.volume = newVolume;
+  }
+};
 
 
     document.addEventListener('keydown', handleKeyDown);
@@ -91,11 +119,98 @@ const handleButtonClick = (speaker) => {
 
   const handleAudioEnd = () => {
     console.log('Audio playback has ended.');
-    setIsPlaying(false); // Update state to indicate audio has stopped
+    setIsPlaying(false);
   };
+
+const handleEditorChange = (content) => {
+  setEditorContent(content);
+  console.log("Editor Content Updated:", content); // Log the content immediately
+};
+
+
+
+const downloadFile = async (format) => {
+  if (!editorContent) {
+    console.log("No content to download");
+    return;
+  }
+
+  if (format === 'docx') {
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = editorContent;
+
+    // Extract plain text content while preserving line breaks
+    const lines = [];
+    const children = tempElement.childNodes;
+    children.forEach(child => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        // Text nodes
+        lines.push(child.textContent);
+      } else if (child.nodeName === 'BR') {
+        // Handle line breaks
+        lines.push(''); // Adding an empty string for <br>
+      } else if (child.nodeName === 'P') {
+        // Handle paragraph
+        lines.push(child.textContent); // Add paragraph content
+        lines.push(''); // Add an empty string for paragraph separation
+      }
+    });
+
+    // Create a DOCX document
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: lines.map((line) => {
+            return new Paragraph({
+              children: [
+                new TextRun({
+                  text: line,
+                  break: 1, // Add a line break after each text run
+                }),
+              ],
+            });
+          }),
+        },
+      ],
+    });
+
+    try {
+      const blob = await Packer.toBlob(doc);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'editor-content.docx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error generating the docx file:', error);
+    }
+  } else {
+    // Handle other formats like TXT as before
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = editorContent;
+    let plainText = tempElement.innerText || tempElement.textContent;
+    plainText = plainText.replace(/(<br\s*\/?>|\n)/g, '\n'); // Convert <br> to new lines
+    const blob = new Blob([plainText], { type: 'text/plain' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'editor-content.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+
 
   useEffect(() => {
     console.log("isPlaying",isPlaying)
+    console.log(editorContent)
+    if(isOpen == false){
+      console.log(speaker1, speaker2,speaker3,speaker4)
+    }
     if (audioRef.current) {
       audioRef.current.addEventListener('ended', handleAudioEnd);
     }
@@ -104,7 +219,7 @@ const handleButtonClick = (speaker) => {
         audioRef.current.removeEventListener('ended', handleAudioEnd);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying,isOpen,editorContent]);
   
   return (
     <div>
@@ -136,24 +251,48 @@ const handleButtonClick = (speaker) => {
       )}
       
 <section className='buttons'>
-  <button className='speaker-button one' onClick={(e)=>{handleButtonClick(one)}}>{one}</button> 
+  <button className='speaker-button one' onClick={(e)=>{handleButtonClick(speaker1)}}>{one}</button> 
   <input className="speaker-input" type='text' value={one} onChange={handleInputChange(setOne)}/>
-  <button className='speaker-button two' onClick={(e)=>{handleButtonClick(two)}}>{two}</button> 
+  <button className='speaker-button two' onClick={(e)=>{handleButtonClick(speaker2)}}>{two}</button> 
   <input className="speaker-input" type='text' value={two} onChange={handleInputChange(setTwo)}/>
-  <button className='speaker-button three' onClick={(e)=>{handleButtonClick(three)}}>{three}</button> 
+  <button className='speaker-button three' onClick={(e)=>{handleButtonClick(speaker3)}}>{three}</button> 
   <input className="speaker-input" type='text' value={three} onChange={handleInputChange(setThree)}/>
-  <button className='speaker-button four' onClick={(e)=>{handleButtonClick(four)}}>{four}</button> 
+  <button className='speaker-button four' onClick={(e)=>{handleButtonClick(speaker4)}}>{four}</button> 
   <input className="speaker-input" type='text' value={four} onChange={handleInputChange(setFour)}/>
 </section>
       <section className='main-content'>
 
-<SunEditor getSunEditorInstance={editor => { editorRef.current = editor; }} />
+<SunEditor getSunEditorInstance={editor => { editorRef.current = editor; }} 
+  onChange={handleEditorChange}
+  />
 
+<div>
+<button onClick={() => downloadFile('txt')}>Download as TXT</button>
+      <button onClick={() => downloadFile('docx')}>Download as DOCX</button>
+      </div>
       </section>
     </div>
-<Modal isOpen={isOpen} setOpen={setIsOpen}/>
+<Modal isOpen={isOpen} setOpen={setIsOpen} 
+speaker1={speaker1}
+speaker2={speaker2}
+speaker3={speaker3}
+speaker4={speaker4}
+speakerF1={setSpeaker1}
+speakerF2={setSpeaker2}
+speakerF3={setSpeaker3}
+speakerF4={setSpeaker4}
+playKey={playKey}
+pauseKey={pauseKey}
+setPlayKey={setPlayKey}
+setPauseKey={setPauseKey}
+setVolumeUp={setVolumeUp}
+setVolumeDown={setVolumeDown}
+volumeUp={volumeUp}
+volumeDown={volumeDown}
+/>
     </div>
   );
 }
 
 export default App;
+
