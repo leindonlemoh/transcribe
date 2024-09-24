@@ -2,8 +2,10 @@ import React,{useState} from 'react';
 import icon from "./Image/info.png"
 import Info from './Info';
 const Modal = ({
+  
   isOpen,
   setOpen,
+  type,
   speaker1,
   speaker2,
   speaker3,
@@ -25,8 +27,14 @@ const Modal = ({
    
   };
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  console.log(type)
   return (
-    <div className='modal-container' style={{ display: isOpen === false ? 'none' : 'flex' }}>
+<>
+ 
+
+
+{type == 'keys' ?
+<div className='modal-container' style={{ display: isOpen === false ? 'none' : 'flex' }}>
       <div className='modal-main'>
         <div className='modal-header'>
           <div className='header'>
@@ -117,7 +125,35 @@ const Modal = ({
           </div>
         </div>
       </div>
+    </div> :
+   <div className='modal-container' style={{ display: isOpen === false ? 'none' : 'flex' }}>
+      <div className='modal-main'>
+        <div className='modal-header'>
+          <div className='header'>
+            <p> You record nothing
+        </p>
+
+          </div>
+          <div className='close-modal-btn'>
+            <button className='close-btn' aria-label='Close' onClick={() => setOpen(false)}>
+              &times;
+            </button>
+          </div>
+        </div>
+        <div className='modal-content'>
+          <div className='modal-content-col'>
+            <div className='keys-label'>
+  <h4 style={{textAlign:'center'}}>Nothing to be downloaded</h4>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    }
+
+    </>
   );
 };
 

@@ -11,6 +11,7 @@ function App() {
   const editorRef = useRef(null);
   const [isOpen,setIsOpen] = useState(false)
   const [fileName, setFileName] = useState('')
+  const [type, setType] = useState('keys')
 
   const [speaker1,setSpeaker1]=useState('1')
   const [speaker2,setSpeaker2]=useState('2')
@@ -45,14 +46,24 @@ function App() {
   
 const handleButtonClick = (speaker) => {
   if (editorRef.current) {
-    editorRef.current.insertHTML('<br/>' + speaker + ":");
+    editorRef.current.insertHTML('<p> ' + speaker + ": </p>");
   }
 };
 
-
-
     const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
+  };
+
+
+    const handleVolumeChange = (change) => {
+
+  if (audioRef.current) {
+    // Get the current volume and adjust it
+    const newVolume = Math.min(Math.max(audioRef.current.volume + change, 0), 1); // Keep volume between 0 and 1
+return    audioRef.current.volume = newVolume;
+  
+};
+
   };
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -69,19 +80,12 @@ const handleButtonClick = (speaker) => {
   } else if (event.altKey && event.key === pauseKey) {
     pauseAudio();
   } else if (event.altKey && event.key === volumeUp) {
-    adjustVolume(0.1); // Increase volume by 0.1
+    handleVolumeChange(0.1); // Increase volume by 0.1
   } else if (event.altKey && event.key === volumeDown) {
-    adjustVolume(-0.1); // Decrease volume by 0.1
+    handleVolumeChange(-0.1); // Decrease volume by 0.1
   }
 };
 
-const adjustVolume = (change) => {
-  if (audioRef.current) {
-    // Get the current volume and adjust it
-    const newVolume = Math.min(Math.max(audioRef.current.volume + change, 0), 1); // Keep volume between 0 and 1
-    audioRef.current.volume = newVolume;
-  }
-};
 
 
     document.addEventListener('keydown', handleKeyDown);
@@ -113,10 +117,6 @@ const adjustVolume = (change) => {
   };
 
 
-  const handleVolumeChange = (e) => {
-    audioRef.current.volume = e.target.value;
-  };
-
   const handleAudioEnd = () => {
     console.log('Audio playback has ended.');
     setIsPlaying(false);
@@ -124,39 +124,41 @@ const adjustVolume = (change) => {
 
 const handleEditorChange = (content) => {
   setEditorContent(content);
-  console.log("Editor Content Updated:", content); // Log the content immediately
+  console.log("Editor Content Updated:", content); 
 };
 
 
 
 const downloadFile = async (format) => {
-  if (!editorContent) {
-    console.log("No content to download");
-    return;
+  if(editorContent == ''){
+
+     setIsOpen(true)
+
+    setType('notif')
+    return
   }
+
 
   if (format === 'docx') {
     const tempElement = document.createElement('div');
     tempElement.innerHTML = editorContent;
 
-    // Extract plain text content while preserving line breaks
     const lines = [];
     const children = tempElement.childNodes;
     children.forEach(child => {
       if (child.nodeType === Node.TEXT_NODE) {
-        // Text nodes
+
         lines.push(child.textContent);
       } else if (child.nodeName === 'BR') {
-        // Handle line breaks
-        lines.push(''); // Adding an empty string for <br>
+    lines.push(child.textContent); 
+    lines.push('');
       } else if (child.nodeName === 'P') {
-        // Handle paragraph
-        lines.push(child.textContent); // Add paragraph content
-        lines.push(''); // Add an empty string for paragraph separation
+
+        lines.push(child.textContent); 
+        lines.push(''); 
       }
     });
 
-    // Create a DOCX document
     const doc = new Document({
       sections: [
         {
@@ -166,7 +168,7 @@ const downloadFile = async (format) => {
               children: [
                 new TextRun({
                   text: line,
-                  break: 1, // Add a line break after each text run
+                  break: 1, 
                 }),
               ],
             });
@@ -207,10 +209,9 @@ const downloadFile = async (format) => {
 
   useEffect(() => {
     console.log("isPlaying",isPlaying)
+
     console.log(editorContent)
-    if(isOpen == false){
-      console.log(speaker1, speaker2,speaker3,speaker4)
-    }
+
     if (audioRef.current) {
       audioRef.current.addEventListener('ended', handleAudioEnd);
     }
@@ -224,7 +225,8 @@ const downloadFile = async (format) => {
   return (
     <div>
       <section className='sortcutkey-btn-container'> 
-        <button className='shortcut-key-btn' onClick={(e)=>{setIsOpen(true)}}> Shortcut Keys</button>
+        <button className='shortcut-key-btn' onClick={(e)=>{setIsOpen(true);
+          setType('keys')}}> Shortcut Keys</button>
       </section>
     <div className="main-container">
 
@@ -273,6 +275,7 @@ const downloadFile = async (format) => {
       </section>
     </div>
 <Modal isOpen={isOpen} setOpen={setIsOpen} 
+type={type}
 speaker1={speaker1}
 speaker2={speaker2}
 speaker3={speaker3}
